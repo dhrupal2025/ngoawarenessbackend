@@ -10,7 +10,7 @@ import com.ngo.service.FeedbackService;
 
 @RestController
 @RequestMapping("/api/feedback")
-@CrossOrigin(origins = "http://localhost:5174")
+@CrossOrigin(origins = "https://ngoawarenessfrontend-meyv.vercel.app")
 public class FeedbackController {
 
     @Autowired

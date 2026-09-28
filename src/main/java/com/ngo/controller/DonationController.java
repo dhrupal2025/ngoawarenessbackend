@@ -10,7 +10,7 @@ import com.ngo.service.DonationService;
 
 @RestController
 @RequestMapping("/api/donations")
-@CrossOrigin(origins = "http://localhost:5174")
+@CrossOrigin(origins = "https://ngoawarenessfrontend-meyv.vercel.app")
 public class DonationController {
 
     @Autowired

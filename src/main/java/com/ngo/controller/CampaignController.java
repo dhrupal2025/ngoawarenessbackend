@@ -10,7 +10,7 @@ import com.ngo.service.CampaignService;
 
 @RestController
 @RequestMapping("/api/campaigns")
-@CrossOrigin(origins = "http://localhost:5174")
+@CrossOrigin(origins = "https://ngoawarenessfrontend-meyv.vercel.app")
 public class CampaignController {
 
     @Autowired

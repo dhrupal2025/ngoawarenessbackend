@@ -19,7 +19,7 @@ import com.ngo.service.PDFService;
 
 @RestController
 @RequestMapping("/api/pdf")
-@CrossOrigin(origins="http://localhost:5174")
+@CrossOrigin(origins="https://ngoawarenessfrontend-meyv.vercel.app")
 public class PDFController {
 
 

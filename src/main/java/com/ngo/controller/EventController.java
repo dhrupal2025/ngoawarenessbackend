@@ -13,7 +13,7 @@ import com.ngo.service.EventService;
 @RestController
 @RequestMapping("/api/events")
 @CrossOrigin(
-    origins = "http://localhost:5174",
+    origins = "https://ngoawarenessfrontend-meyv.vercel.app",
     methods = {
         RequestMethod.GET,
         RequestMethod.POST,

@@ -23,7 +23,7 @@ import com.ngo.service.RegisterUserService;
 
 @RestController
 @RequestMapping("/api/registeruser")
-@CrossOrigin(origins = "http://localhost:5174")
+@CrossOrigin(origins = "https://ngoawarenessfrontend-meyv.vercel.app")
 public class UserController {
 
     @Autowired

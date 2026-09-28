@@ -10,7 +10,7 @@ import com.ngo.service.VolunteerApplicationService;
 
 @RestController
 @RequestMapping("/api/volunteer-applications")
-@CrossOrigin(origins = "http://localhost:5174")
+@CrossOrigin(origins = "https://ngoawarenessfrontend-meyv.vercel.app")
 public class VolunteerApplicationController {
 
     @Autowired
