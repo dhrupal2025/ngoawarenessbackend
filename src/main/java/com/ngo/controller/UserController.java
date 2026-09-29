@@ -34,102 +34,52 @@ public class UserController {
 
     @Autowired
     private EmailValidationService emailValidationService;
+
     // =====================================================
     // REGISTER USER
     // =====================================================
 
     @PostMapping
-    public ResponseEntity<?> registerUser(
-            @RequestBody RegisterUser user) {
+    public ResponseEntity<?> registerUser(@RequestBody RegisterUser user) {
 
-        // Validate fields
-        if (user.getName() == null ||
-            user.getName().trim().isEmpty()) {
-
-            return ResponseEntity.badRequest()
-                    .body("Name is required");
+        if (user.getName() == null || user.getName().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Name is required");
         }
 
-        if (user.getEmail() == null ||
-            user.getEmail().trim().isEmpty()) {
-
-            return ResponseEntity.badRequest()
-                    .body("Email is required");
+        if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Email is required");
         }
 
-        if (user.getMobile() == null ||
-            user.getMobile().trim().isEmpty()) {
-
-            return ResponseEntity.badRequest()
-                    .body("Mobile number is required");
+        if (user.getMobile() == null || user.getMobile().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Mobile number is required");
         }
 
-        if (user.getPassword() == null ||
-            user.getPassword().trim().isEmpty()) {
-
-            return ResponseEntity.badRequest()
-                    .body("Password is required");
+        if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Password is required");
         }
 
-
-        // Normalize email
-        String email = user.getEmail()
-                .trim()
-                .toLowerCase();
-
+        String email = user.getEmail().trim().toLowerCase();
         user.setEmail(email);
 
-
-        // ==========================================
-        // EMAIL MUST BE OTP VERIFIED
-        // ==========================================
-
         if (!otpService.isEmailVerified(email)) {
-
-            return ResponseEntity.badRequest()
-                    .body(
-                        "Email address is not real or not verified. Please verify OTP first."
-                    );
+            return ResponseEntity.badRequest().body(
+                "Email address is not real or not verified. Please verify OTP first."
+            );
         }
-
-
-        // ==========================================
-        // CHECK DUPLICATE EMAIL
-        // ==========================================
 
         if (registerUserService.emailExists(email)) {
-
-            return ResponseEntity.badRequest()
-                    .body(
-                        "This email is already registered."
-                    );
+            return ResponseEntity.badRequest().body(
+                "This email is already registered."
+            );
         }
 
-
-        // ==========================================
-        // SAVE USER IN MYSQL
-        // ==========================================
-
         try {
-
-            RegisterUser savedUser =
-                    registerUserService.saveUser(user);
-
-            // Remove OTP verification
+            RegisterUser savedUser = registerUserService.saveUser(user);
             otpService.removeVerification(email);
-
-            return ResponseEntity.ok(
-                    "Registration Successful!"
-            );
-
+            return ResponseEntity.ok("Registration Successful!");
         } catch (Exception e) {
-
             e.printStackTrace();
-
-            return ResponseEntity.badRequest()
-                    .body(
-                        "Registration failed."
-                    );
+            return ResponseEntity.badRequest().body("Registration failed.");
         }
     }
 
@@ -139,28 +89,19 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<List<RegisterUser>> getAllUsers() {
-
-        List<RegisterUser> users =
-                registerUserService.getAllUsers();
-
+        List<RegisterUser> users = registerUserService.getAllUsers();
         return ResponseEntity.ok(users);
     }
-
 
     // =====================================================
     // GET USER BY ID
     // =====================================================
 
     @GetMapping("/{id}")
-    public ResponseEntity<RegisterUser> getUserById(
-            @PathVariable Long id) {
-
-        RegisterUser user =
-                registerUserService.getUserById(id);
-
+    public ResponseEntity<RegisterUser> getUserById(@PathVariable Long id) {
+        RegisterUser user = registerUserService.getUserById(id);
         return ResponseEntity.ok(user);
     }
-
 
     // =====================================================
     // UPDATE USER
@@ -170,206 +111,113 @@ public class UserController {
     public ResponseEntity<RegisterUser> updateUser(
             @PathVariable Long id,
             @RequestBody RegisterUser user) {
-
-        RegisterUser updatedUser =
-                registerUserService.updateUser(id, user);
-
+        RegisterUser updatedUser = registerUserService.updateUser(id, user);
         return ResponseEntity.ok(updatedUser);
     }
-
 
     // =====================================================
     // DELETE USER
     // =====================================================
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(
-            @PathVariable Long id) {
-
+    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         registerUserService.deleteUser(id);
-
-        return ResponseEntity.ok(
-                "User Deleted Successfully"
-        );
+        return ResponseEntity.ok("User Deleted Successfully");
     }
-
 
     // =====================================================
     // LOGIN
     // =====================================================
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(
-            @RequestBody RegisterUser user) {
-
-        RegisterUser loginUser =
-                registerUserService.loginUser(
-                        user.getEmail(),
-                        user.getPassword()
-                );
+    public ResponseEntity<?> login(@RequestBody RegisterUser user) {
+        RegisterUser loginUser = registerUserService.loginUser(
+                user.getEmail(),
+                user.getPassword()
+        );
 
         if (loginUser != null) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Login Successful");
+            response.put("email", loginUser.getEmail());
 
-            Map<String, Object> response =
-                    new HashMap<>();
-
-            response.put(
-                    "message",
-                    "Login Successful"
-            );
-
-            response.put(
-                    "email",
-                    loginUser.getEmail()
-            );
-
-
-            if (loginUser.getEmail()
-                    .equalsIgnoreCase("admin@ngo.com")) {
-
-                response.put(
-                        "type",
-                        "admin@ngo.com"
-                );
-
+            if (loginUser.getEmail().equalsIgnoreCase("admin@ngo.com")) {
+                response.put("type", "admin@ngo.com");
             } else {
-
-                response.put(
-                        "type",
-                        "USER"
-                );
+                response.put("type", "USER");
             }
 
             return ResponseEntity.ok(response);
-
         } else {
-
-            return ResponseEntity.badRequest()
-                    .body(
-                        "Invalid Email or Password"
-                    );
+            return ResponseEntity.badRequest().body("Invalid Email or Password");
         }
     }
 
-
     // =====================================================
-    // SEND OTP
+    // SEND OTP (FIXED: Email deliverability check bypassed)
     // =====================================================
-
- // =====================================================
- // SEND OTP
- // =====================================================
 
     @PostMapping("/send-otp")
-    public ResponseEntity<?> sendOtp(
-            @RequestBody Map<String, String> request) {
+    public ResponseEntity<?> sendOtp(@RequestBody Map<String, String> request) {
 
         String email = request.get("email");
 
         if (email == null || email.trim().isEmpty()) {
-
-            return ResponseEntity.badRequest()
-                    .body("Email is required.");
+            return ResponseEntity.badRequest().body("Email is required.");
         }
 
         email = email.trim().toLowerCase();
 
-
-        // Email format
-        if (!email.matches(
-                "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-
-            return ResponseEntity.badRequest()
-                    .body("Email is not real. OTP is not sent.");
+        // Basic Regex format check
+        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+            return ResponseEntity.badRequest().body("Invalid email format.");
         }
 
-
-        // Email/domain validation
-        boolean validEmail =
-                emailValidationService.isEmailDeliverable(email);
-
+        /* 
+        // Bypassed: Render DNS/SMTP lookups fail and trigger 400 Bad Request
+        boolean validEmail = emailValidationService.isEmailDeliverable(email);
         if (!validEmail) {
-
-            return ResponseEntity.badRequest()
-                    .body("Email is not real. OTP is not sent.");
+            return ResponseEntity.badRequest().body("Email is not real. OTP is not sent.");
         }
-
+        */
 
         // Send OTP
         try {
-
             otpService.sendOtp(email);
-
-            return ResponseEntity.ok(
-                    "OTP sent successfully."
-            );
-
+            return ResponseEntity.ok("OTP sent successfully.");
         } catch (Exception e) {
-
             e.printStackTrace();
-
-            return ResponseEntity.badRequest()
-                    .body(
-                        "Email is not real. OTP is not sent."
-                    );
+            return ResponseEntity.badRequest().body("Failed to send OTP. Please check email address.");
         }
     }
+
     // =====================================================
     // VERIFY OTP
     // =====================================================
 
     @PostMapping("/verify-otp")
-    public ResponseEntity<?> verifyOtp(
-            @RequestBody Map<String, String> request) {
+    public ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> request) {
 
-        String email =
-                request.get("email");
+        String email = request.get("email");
+        String otp = request.get("otp");
 
-        String otp =
-                request.get("otp");
-
-
-        if (email == null ||
-            email.trim().isEmpty()) {
-
-            return ResponseEntity.badRequest()
-                    .body("Email is required");
+        if (email == null || email.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Email is required");
         }
 
-
-        if (otp == null ||
-            otp.trim().isEmpty()) {
-
-            return ResponseEntity.badRequest()
-                    .body("OTP is required");
+        if (otp == null || otp.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("OTP is required");
         }
 
+        email = email.trim().toLowerCase();
+        otp = otp.trim();
 
-        email =
-                email.trim().toLowerCase();
-
-        otp =
-                otp.trim();
-
-
-        boolean verified =
-                otpService.verifyOtp(
-                        email,
-                        otp
-                );
-
+        boolean verified = otpService.verifyOtp(email, otp);
 
         if (!verified) {
-
-            return ResponseEntity.badRequest()
-                    .body(
-                        "Invalid or expired OTP"
-                    );
+            return ResponseEntity.badRequest().body("Invalid or expired OTP");
         }
 
-
-        return ResponseEntity.ok(
-                "Email verified successfully"
-        );
+        return ResponseEntity.ok("Email verified successfully");
     }
 }
