@@ -1,4 +1,4 @@
-package com.ngo.config; // તમારું પેકેજ નેમ રાખવું
+package com.ngo.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -35,9 +35,12 @@ public class MailConfig {
         props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.auth", "true");
         
-        // Port 465 (SSL) Render સર્વર માટે
+        // SSL socket connection for Port 465
         props.put("mail.smtp.ssl.enable", "true");
         props.put("mail.smtp.starttls.enable", "false");
+        props.put("mail.smtp.socketFactory.port", "465");
+        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        props.put("mail.smtp.socketFactory.fallback", "false");
         
         // Timeout Settings
         props.put("mail.smtp.connectiontimeout", "10000");
