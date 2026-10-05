@@ -1,4 +1,4 @@
-package com.ngo.config;
+package com.ngo.config; // તમારું પેકેજ નેમ રાખવું
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -11,6 +11,12 @@ import java.util.Properties;
 @Configuration
 public class MailConfig {
 
+    @Value("${MAIL_HOST:smtp.gmail.com}")
+    private String mailHost;
+
+    @Value("${MAIL_PORT:465}")
+    private int mailPort;
+
     @Value("${MAIL_USERNAME}")
     private String mailUsername;
 
@@ -20,17 +26,20 @@ public class MailConfig {
     @Bean
     public JavaMailSender javaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost("smtp.gmail.com");
-        mailSender.setPort(587); // Gmail TLS Port
-
+        mailSender.setHost(mailHost);
+        mailSender.setPort(mailPort);
         mailSender.setUsername(mailUsername);
         mailSender.setPassword(mailPassword);
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.starttls.required", "true");
+        
+        // Port 465 (SSL) Render સર્વર માટે
+        props.put("mail.smtp.ssl.enable", "true");
+        props.put("mail.smtp.starttls.enable", "false");
+        
+        // Timeout Settings
         props.put("mail.smtp.connectiontimeout", "10000");
         props.put("mail.smtp.timeout", "10000");
         props.put("mail.smtp.writetimeout", "10000");
